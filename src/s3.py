@@ -14,6 +14,7 @@ SETTINGS = dict(config.items("SETTINGS"))
 
 filetypestobedownloaded = SETTINGS.get('filetypestobedownloaded').strip().split(",")
 io_path = Path(SETTINGS.get("io"))
+io_path.mkdir(exist_ok=True)
 
 class AwsS3(object):
     def __init__(self) -> None:
