@@ -12,7 +12,7 @@ AWS = dict(config.items("AWS"))
 S3 = dict(config.items("S3"))
 SETTINGS = dict(config.items("SETTINGS"))
 
-filetypestobedownloaded = SETTINGS.get('filetypestobedownloaded').strip().split(",")
+filetypestobedownloaded = list(filter(None, [f.strip() for f in SETTINGS.get('filetypestobedownloaded').strip().split(",")]))
 io_path = Path(SETTINGS.get("io"))
 io_path.mkdir(exist_ok=True)
 
@@ -26,7 +26,7 @@ class AwsS3(object):
         self.s3 = self.session.resource("s3", region_name=S3.get("region").strip())
         self.queue = LifoQueue(maxsize=5000)
 
-    def _download_single_file(self, bucket: object, prefix: any=None):
+    def _download_single_file(self, bucket: object, prefix: any=""):
         for obj in bucket.objects.filter(Prefix=prefix):
             try:
                 filename = obj.key
@@ -53,9 +53,13 @@ class AwsS3(object):
 
     def _download_files(self, bucket_name: str, prefixes: list) -> object:
         bucket = self.s3.Bucket(bucket_name)
+        if len(prefixes)==0:
+            prefixes = [""]
         for prefix in prefixes:
+            if prefix is None:
+                prefix = ""
             try:
-                print(f"Processing Bucket Name: {bucket_name} Prefix: {prefix}")
+                print(f"Processing Bucket Name: {bucket_name}, Prefix: {prefix}")
                 self.queue.put(prefix, block=True, timeout=None)   
                 thread = MultiThread(
                             queue=self.queue, 
@@ -72,11 +76,11 @@ class AwsS3(object):
     
     def download_files(self) -> None:
         print("Starting Download....")
-        bucketnames = S3.get("bucketnames").strip().split("|")
-        prefixes = S3.get("prefixes").strip().split("|")
-        bucket_prefixes = dict(zip(bucketnames, [p.strip().split(",") for p in prefixes]))
+        bucketnames = list(filter(None, [b.strip() for b in S3.get("bucketnames").strip().split("|")]))
+        prefixes = list(filter(None, [p.strip() for p in S3.get("prefixes").strip().split("|")]))
+        bucket_prefixes = dict(zip(bucketnames, [list(filter(None, [x.strip() for x in p.split(",")])) for p in prefixes]))
         for bucket_name, prefixes in bucket_prefixes.items():
-            print(f"Bucket Name: {bucket_name} Prefixes: {', '.join(prefixes)}")
+            print(f"Bucket Name: {bucket_name}, Prefixes: {', '.join(prefixes)}")
             self.queue.put(bucket_name, block=True, timeout=None)
             thread = MultiThread(
                         queue=self.queue, 

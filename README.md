@@ -25,6 +25,28 @@ Sk Khurshid Alam
 
 ## Local Setup of Environment and Run Utility
 
+### Configure the *src > config.properties*
+
+#### Configure *AWS* section
+* Set AccessKeyID to *Your AWS Access Key ID*
+* Set SecretAccessKey to *Your AWS Secret Access Key*
+* Region to *Your AWS Region*
+
+#### Configure *S3* section
+* Set Region to *Your AWS S3 Region*
+* Set BucketNames to *Your AWS S3 Bucket Name/s* <br>
+**Note: You can use multiple bucket names with '|' seperated delimeter**
+* Set Prefixes to *Your AWS S3 Object Prefix/es* <br>
+**Note: You can use multiple prefix items with '|' seperated delimeter, and for each item you can further user ',' seperated prefix for corresponding bucket**
+
+
+#### Configure *SETTINGS* section
+* Set IO to *Input/Output folder* for storing the downloaded files
+* Set FileTypesToBeDownloaded to the *File Types which need to be downloaded* from S3 <br>
+**Note: You can use multiple file types with ',' seperated delimeter**
+
+#### For your reference please go through *example1-config.properties*, *example2-config.properties*, *example3-config.properties* to have more clarity.
+
 ### Unix Setup
 
 #### If pip is not in your system install pip
